@@ -16,9 +16,14 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 
-
-
-public class Cluster{
+//Podría ser una lista
+public class Cluster{		//Otra clase cluster
+	private String name;
+	private double[] coordinates;
+	private double[] centroidCoordinates;
+	private PriorityQueue<Double> minDissimilarities;
+	private Cluster[] containedClusters = { };	//Change
+	
 	
 	public static double cvsMinValue(PriorityQueue <Double> pqueue){
 		return pqueue.peek();
@@ -44,36 +49,25 @@ public class Cluster{
 		}
 	}
 	
-	/**
-	 * 
-	 * @param filePath The CSV document path.
-	 * @return A normalized matrix of [n x p] size, n objects with p attributes .
-	 * @throws IOException
-	 * @throws FileNotFoundException
-	 */
-	public static double[][] normalize(String filePath) throws IOException, FileNotFoundException{
-		double minValue        = 0;
-		double maxValue        = 0;
+	public static double[][] cvsReader(String filePath) throws IOException, FileNotFoundException{
 		int numberOfObjects    = 0;
 		int numberOfAttributes = 0;
-		
-		PriorityQueue<Double> cvsValues       = new PriorityQueue<Double>(1);
-		ArrayList<CSVRecord>  valuesArrayList = new ArrayList    <CSVRecord>();
+	
 		Reader in = new FileReader(filePath);
 		Iterable<CSVRecord> records = CSVFormat.RFC4180.withFirstRecordAsHeader().parse(in);
 		CSVRecord record;
 		records.iterator();
 		Iterator<CSVRecord> iterator = records.iterator();
-		
+		ArrayList<CSVRecord>valuesArrayList = new ArrayList<CSVRecord>();
+	
 		while(iterator.hasNext()){
 			record = iterator.next();
 			valuesArrayList.add(record);
 		}
-		
+	
 		numberOfObjects    = valuesArrayList.size();
 		numberOfAttributes = valuesArrayList.get(0).size();
 		double normalMatrix[][]     = new double[numberOfObjects][numberOfAttributes];
-		double normalizedMatrix[][] = new double[numberOfObjects][numberOfAttributes];
 		
 		for(int i = 0; i < numberOfAttributes; i++) {	
 			for(int j = 0; j < numberOfObjects; j++){	
@@ -83,18 +77,37 @@ public class Cluster{
 				if(asciiValue >= 63 && asciiValue <= 165)
 					strColumnData = String.valueOf(asciiValue);
 				double data = Double.parseDouble(strColumnData);
-				cvsValues.add(data);
 				normalMatrix[j][i] = data;
+			}
+		}
+		return normalMatrix;
+	}
+	
+	public static double[][] normalize(double[][] matrix){
+		double minValue        = 0;
+		double maxValue        = 0;
+		int numberOfObjects    = matrix.length;
+		int numberOfAttributes = matrix[0].length;
+		
+		PriorityQueue<Double> cvsValues = new PriorityQueue<Double>(1);
+
+		double normalizedMatrix[][] = new double[numberOfObjects][numberOfAttributes];
+		
+		for(int i = 0; i < numberOfAttributes; i++) {	
+			for(int j = 0; j < numberOfObjects; j++){	
+				cvsValues.add(matrix[j][i]);
 			}
 			minValue = cvsMinValue(cvsValues);
 			maxValue = cvsMaxValue(cvsValues);
 			for(int j = 0; j < numberOfObjects; j++){
-				normalizedMatrix[j][i] = (normalMatrix[j][i] - minValue) / (maxValue - minValue);
+				if( maxValue - minValue == 0) //Special Case: There is no max or min.
+					normalizedMatrix[j][i] = 0;
+				else
+					normalizedMatrix[j][i] = (matrix[j][i] - minValue) / (maxValue - minValue);
 			}
 		}
 		return normalizedMatrix;
 	}
-
+	
 		
 }
-	
