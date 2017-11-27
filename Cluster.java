@@ -168,6 +168,78 @@ public class Cluster{		//Otra clase cluster
 			System.out.printf("]\n");
 		}
 	}
+	
+	//------------------------------------------------------------------------------------------------------//	
+	//Método que saca la distancia mínima entre dos puntos. Devuelve un arreglo con dos puntos.
+	public static int[] distMin(double[][] values){
+		
+		double[][] distancesVec = new double[values.length*(values.length-1)/2][values[0].length];
+		int[][] pointsList = new int[distancesVec.length][2];
+		int[] minPoints = new int[2];
+		HashMap<Double, Integer> invPoints = new HashMap<Double, Integer>();
+		HashMap<Integer, Double> points = new HashMap<Integer, Double>();
+		PriorityQueue<Double> magnitude = new PriorityQueue<Double>();
+		int cont = 0;
+				
+		
+		//ALGORITMO PARA CALCULAR VECTORES
+		for(int x = 0; x < values.length; x++) {
+			for(int i = x+1; i < values.length; i++) {
+				for(int n = 0; n < values[x].length; n++) {
+					distancesVec[cont][n] = (values[i][n]-values[x][n]);
+//					System.out.println(String.format("Distance[%d][%d] = %f\n", cont, n, distancesVec[cont][n]));
+				}
+				//GUARDA LOS PUNTOS QUE CORRESPONDEN A CADA POSICIÓN DEL ARREGLO DE VECTORES
+				pointsList[cont][0] = x;
+				pointsList[cont][1] = i;
+//				System.out.println(pointsList[cont][0] + " " + pointsList[cont][1]);
+				cont++;
+
+			}
+		}		
+
+		//IMPRIME EL ARREGLO DE VECTORES
+		for(int i = 0; i < distancesVec.length; i++){
+		System.out.printf("[\t");
+		for(int j = 0; j < distancesVec[i].length; j++){
+			System.out.printf("%f\t",distancesVec[i][j]);
+		}
+		System.out.printf("]\n");
+		}
+		
+		
+		//ALGORITMO QUE SACA LA MAGNITUD DE CADA VECTOR
+		double acum = 0;
+		for(int i = 0; i < distancesVec.length; i++) {
+			for(int j = 0; j < distancesVec[i].length; j++) {
+				acum += Math.pow(distancesVec[i][j], 2);
+			}
+			//AGREGA AL HASHMAP puntos
+			points.put((int)i, Math.sqrt(acum));
+			//AGREGA AL PRIORITYQUEUE UN NUEVO DATO
+			magnitude.add(Math.sqrt(acum));
+			acum = 0;
+		}
+		
+		
+		//HACEMOS UN HASHMAP DE PUNTOS INVERTIDO PARA PODER BUSCAR LA LLAVE CON EL VALOR
+		for(double i = 0; i < points.size(); i++) {
+			invPoints.put(points.get((int)i), (int)i);
+		}
+		
+		
+		System.out.println("Min magnitude: " + magnitude.peek());
+		System.out.println("Vector Array Position" + invPoints.get(magnitude.peek())); //EL PEEK ARROJARÁ UNA POSICIÓN
+		System.out.println("Closest points are: " + "[" + pointsList[invPoints.get(magnitude.peek())][0] + ", " + pointsList[invPoints.get(magnitude.peek())][1] + "]");
+		
+		minPoints[0] = pointsList[invPoints.get(magnitude.peek())][0];
+		minPoints[1] = pointsList[invPoints.get(magnitude.peek())][1];
+		
+		return minPoints;
+
+	}
+//--------------------------------------------------------------------------------------------//		
+
 
 	
 }
